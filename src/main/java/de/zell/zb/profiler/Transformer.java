@@ -2,62 +2,112 @@ package de.zell.zb.profiler;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
-import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
 
-import javassist.ClassPool;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassWriter;
 
 /**
  *
  */
 public class Transformer implements ClassFileTransformer
 {
-    private final Instrumentation instrumentation;
-    private final ClassPool classPool;
+    private final String filter;
 
-    public Transformer(Instrumentation inst)
+    public Transformer(String filter)
     {
-        instrumentation = inst;
-        classPool = ClassPool.getDefault();
-        instrumentation.addTransformer(this);
+        this.filter = filter;
     }
 
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer)
         throws IllegalClassFormatException
     {
-        System.out.print("Loading class: ");
-        System.out.println(className);
-        return classfileBuffer;
-//        try
-//        {
-//            classPool.insertClassPath(new ByteArrayClassPath(className, classfileBuffer));
-//            final CtClass cc = classPool.get(className);
-//            final CtMethod[] methods = cc.getMethods();
-//            for (int k = 0; k < methods.length; k++)
-//            {
-//                if (methods[k].getLongName().startsWith(className))
-//                {
-//                    methods[k].insertBefore("System.out.println(\"Entering " + methods[k].getLongName() + "\");");
-//                    methods[k].insertAfter("System.out.println(\"Exiting " + methods[k].getLongName() + "\");");
-//                }
+        if (filter == null || filter.isEmpty() || filter.equalsIgnoreCase(className))
+        {
+            System.out.println(className);
+            try
+            {
+                final ClassReader classReader = new ClassReader(classfileBuffer);
+                final ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS);
+                final ClassAnalyzer classAnalyzer = new ClassAnalyzer(classWriter);
+                classReader.accept(classAnalyzer, 0);
+                return classWriter.toByteArray();
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+
+
+//    public class Profile {
+//
+//        public static void start(String className, String methodName) {
+//            System.out.println(new StringBuilder(className)
+//                                   .append(‘\t’)
+//                                   .append(methodName)
+//                                   .append(“\tstart\t”)
+//                                   .append(System.currentTimeMillis()));
+//        }
+//
+//        public static void end(String className, String methodName) {
+//            System.out.println(new StringBuilder(className)
+//                                   .append(‘\t’)
+//                                   .append(methodName)
+//                                   .append(“\end\t”)
+//                                   .append(System.currentTimeMillis()));
+//        }
+//    }
+
+
+//    public class PerfMethodAdapter extends MethodAdapter
+//    {
+//        private String className, methodName;
+//
+//        public PerfMethodAdapter(MethodVisitor visitor, String className,
+//                                 String methodName) {
+//            super(visitor);
+//            className = className;
+//            methodName = methodName;
+//        }
+//
+//        public void visitCode() {
+//            this.visitLdcInsn(className);
+//            this.visitLdcInsn(methodName);
+//            this.visitMethodInsn(INVOKESTATIC,
+//                                 "sample/profiler/Profile",
+//                                 "start",
+//                                 "(Ljava/lang/String;Ljava/lang/String;)V");
+//            super.visitCode();
+//        }
+//
+//        public void visitInsn(int inst) {
+//            switch (inst) {
+//            case Opcodes.ARETURN:
+//            case Opcodes.DRETURN:
+//            case Opcodes.FRETURN:
+//            case Opcodes.IRETURN:
+//            case Opcodes.LRETURN:
+//            case Opcodes.RETURN:
+//            case Opcodes.ATHROW:
+//                this.visitLdcInsn(className);
+//                this.visitLdcInsn(methodName);
+//                this.visitMethodInsn(INVOKESTATIC,
+//                                     "sample/profiler/Profile",
+//                                     "end",
+//                                     "(Ljava/lang/String;Ljava/lang/String;)V");
+//                break;
+//            default:
+//                break;
 //            }
 //
-//            // return the new bytecode array:
-//            final byte[] newClassfileBuffer = cc.toBytecode();
-//            return newClassfileBuffer;
+//            super.visitInsn(inst);
 //        }
-//        catch (IOException ioe)
-//        {
-//            System.err.println(ioe.getMessage() + " transforming class " + className + "; returning uninstrumented    class");
-//        }
-//        catch (NotFoundException nfe)
-//        {
-//            System.err.println(nfe.getMessage() + " transforming class " + className + "; returning uninstrumented class");
-//        }
-//        catch (CannotCompileException cce)
-//        {
-//            System.err.println(cce.getMessage() + " transforming class " + className + "; returning uninstrumented class");
-//        }
-//        return null;
-    }
+//    }
+
+
+
 }
