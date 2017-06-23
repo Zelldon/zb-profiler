@@ -35,7 +35,7 @@ public class ClassAnalyzer extends ClassVisitor
         MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
         if (!isInterface && mv != null && !name.equals(CONSTRUCTOR_NAME))
         {
-            mv = new MethodExecutionAnalyzer(mv, name, desc);
+            mv = new MethodExecutionAnalyzer(mv, className, name, desc);
             return mv;
         }
         return mv;

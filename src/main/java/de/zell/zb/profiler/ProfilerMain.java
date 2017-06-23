@@ -8,6 +8,7 @@ public class ProfilerMain
 {
     public static void premain(String args, Instrumentation inst)
     {
+        System.out.println(args);
         inst.addTransformer(new Transformer(args));
     }
 }

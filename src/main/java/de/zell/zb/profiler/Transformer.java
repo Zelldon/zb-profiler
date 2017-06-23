@@ -22,7 +22,7 @@ public class Transformer implements ClassFileTransformer
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer)
         throws IllegalClassFormatException
     {
-        if (filter == null || filter.isEmpty() || filter.equalsIgnoreCase(className))
+        if (filter == null || filter.isEmpty() || className.startsWith(filter))
         {
             final ClassReader classReader = new ClassReader(classfileBuffer);
             final ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS);

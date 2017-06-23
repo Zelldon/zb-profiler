@@ -1,3 +1,2 @@
 #!/bin/bash
-
-java -javaagent:target/zb-profiler-1.0-SNAPSHOT-jar-with-dependencies.jar de.zell.zb.profiler.MainClass
+java -javaagent:target/zb-profiler-1.0-SNAPSHOT-jar-with-dependencies.jar=$1 de.zell.zb.profiler.MainClass
