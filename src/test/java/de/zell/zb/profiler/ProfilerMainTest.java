@@ -7,17 +7,16 @@ import junit.framework.TestSuite;
 /**
  * Unit test for simple ProfilerMain.
  */
-public class ProfilerMainTest
-    extends TestCase
+public class ProfilerMainTest extends TestCase
 {
     /**
      * Create the test case
      *
      * @param testName name of the test case
      */
-    public ProfilerMainTest(String testName )
+    public ProfilerMainTest(String testName)
     {
-        super( testName );
+        super(testName);
     }
 
     /**
@@ -25,7 +24,7 @@ public class ProfilerMainTest
      */
     public static Test suite()
     {
-        return new TestSuite( ProfilerMainTest.class );
+        return new TestSuite(ProfilerMainTest.class);
     }
 
     /**
@@ -33,6 +32,6 @@ public class ProfilerMainTest
      */
     public void testApp()
     {
-        assertTrue( true );
+        assertTrue(true);
     }
 }
