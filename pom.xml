@@ -26,6 +26,7 @@
 
     <build>
         <plugins>
+            <!--set the java version-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -36,6 +37,7 @@
                 </configuration>
             </plugin>
 
+            <!--packs the jar with dependencies and set the profiler main-->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
@@ -46,6 +48,7 @@
                         </manifest>
                         <manifestEntries>
                             <Premain-Class>de.zell.zb.profiler.ProfilerMain</Premain-Class>
+                            <Agentmain-Class>de.zell.zb.profiler.ProfilerMain</Agentmain-Class>
                         </manifestEntries>
                     </archive>
                     <descriptorRefs>
@@ -54,6 +57,7 @@
                 </configuration>
             </plugin>
 
+            <!--checks the code style-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>

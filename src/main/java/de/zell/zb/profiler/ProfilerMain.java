@@ -6,9 +6,15 @@ import java.lang.instrument.Instrumentation;
  */
 public class ProfilerMain
 {
-    public static void premain(String args, Instrumentation inst)
+    public static void premain(String args, Instrumentation instrumentation)
     {
-        System.out.println(args);
-        inst.addTransformer(new Transformer(args));
+        System.out.println("PreMain: " + args);
+        instrumentation.addTransformer(new Transformer(args));
+    }
+
+    public static void agentmain(String args, Instrumentation instrumentation)
+    {
+        System.out.println("Agentmain: " + args);
+        instrumentation.addTransformer(new Transformer(args));
     }
 }
