@@ -19,18 +19,14 @@ public class ClassAnalyzer extends ClassVisitor
     public ClassAnalyzer(ClassWriter writer)
     {
         super(Opcodes.ASM4, writer);
-
-        System.out.println("init");
     }
 
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces)
     {
-        System.out.println("visit class");
         cv.visit(version, access, name, signature, superName, interfaces);
         isInterface = (access & ACC_INTERFACE) != 0;
         className = name;
-        super.visit(version, access, name, signature, superName, interfaces);
     }
 
     @Override
@@ -39,20 +35,16 @@ public class ClassAnalyzer extends ClassVisitor
         MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
         if (!isInterface && mv != null && !name.equals(CONSTRUCTOR_NAME))
         {
-            System.out.println("visit");
             mv = new MethodExecutionAnalyzer(mv, name, desc);
             return mv;
         }
-        return super.visitMethod(access, name, desc, signature, exceptions);
-//        return mv;
-
+        return mv;
     }
 
     @Override
     public void visitEnd()
     {
         super.visitEnd();
-        System.out.println("end");
     }
 
 }
