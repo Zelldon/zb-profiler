@@ -1,15 +1,16 @@
 package de.zell.zb.profiler;
 
-import static org.objectweb.asm.Opcodes.ASM4;
+import static org.objectweb.asm.Opcodes.*;
 
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 /**
  *
  */
 public class MethodExecutionAnalyzer extends MethodVisitor
 {
-//    private static final Logger LOGGER = Logger.getLogger(MethodExecutionAnalyzer.class.getName());
+    //    private static final Logger LOGGER = Logger.getLogger(MethodExecutionAnalyzer.class.getName());
 
     private long startNs;
     private final String className;
@@ -27,15 +28,40 @@ public class MethodExecutionAnalyzer extends MethodVisitor
     @Override
     public void visitCode()
     {
-        mv.visitCode();
-        startNs = System.nanoTime();
+        if (!className.contains("de/zell/zb/profiler"))
+        {
+            mv.visitMethodInsn(INVOKESTATIC, "de/zell/zb/profiler/ExecutionTimeCollector", "getInstance", "()Lde/zell/zb/profiler/ExecutionTimeCollector;");
+            mv.visitLdcInsn(className);
+            mv.visitLdcInsn(methodName);
+            mv.visitMethodInsn(INVOKEVIRTUAL, "de/zell/zb/profiler/ExecutionTimeCollector", "startMethod", "(Ljava/lang/String;Ljava/lang/String;)V");
+            mv.visitCode();
+            //            mv.visitMaxs(-1, -1);
+        }
     }
 
     @Override
-    public void visitEnd()
+    public void visitInsn(int opcode)
     {
-        final long endNs = System.nanoTime();
-        final String msg = "Execution of: " + className + "#" + methodName + methodDescription + " takes " + (endNs - startNs) + " ns.";
-        System.out.println(msg);
+        if (!className.contains("de/zell/zb/profiler"))
+        {
+            System.out.println("Opcode: " + opcode);
+            switch (opcode)
+            {
+                case Opcodes.ARETURN:
+                case Opcodes.DRETURN:
+                case Opcodes.FRETURN:
+                case Opcodes.IRETURN:
+                case Opcodes.LRETURN:
+                case Opcodes.RETURN:
+                case Opcodes.ATHROW:
+                    mv.visitMethodInsn(INVOKESTATIC, "de/zell/zb/profiler/ExecutionTimeCollector", "getInstance", "()Lde/zell/zb/profiler/ExecutionTimeCollector;");
+                    mv.visitLdcInsn(className);
+                    mv.visitLdcInsn(methodName);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, "de/zell/zb/profiler/ExecutionTimeCollector", "endMethod", "(Ljava/lang/String;Ljava/lang/String;)V");
+                    mv.visitMaxs(-1, -1);
+
+            }
+        }
+        mv.visitInsn(opcode);
     }
 }

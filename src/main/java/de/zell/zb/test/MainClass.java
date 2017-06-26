@@ -1,4 +1,4 @@
-package de.zell.zb.profiler;
+package de.zell.zb.test;
 
 /**
  *
@@ -10,6 +10,8 @@ public class MainClass
         System.out.println("Hello World!");
         final Otherclass otherclass = new Otherclass();
         final int sum = otherclass.sum();
+        otherclass.test();
+        otherclass.test();
         otherclass.test();
 
     }

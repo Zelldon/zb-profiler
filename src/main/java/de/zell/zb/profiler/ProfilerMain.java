@@ -10,6 +10,14 @@ public class ProfilerMain
     {
         System.out.println("PreMain: " + args);
         instrumentation.addTransformer(new Transformer(args));
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                ExecutionTimeCollector.getInstance().printTimes();
+            }
+        }));
     }
 
     public static void agentmain(String args, Instrumentation instrumentation)
