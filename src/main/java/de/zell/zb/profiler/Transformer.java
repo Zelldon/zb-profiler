@@ -13,10 +13,12 @@ import javassist.*;
 public class Transformer implements ClassFileTransformer
 {
     private final ClassPool classPool;
+    private final String filter;
 
-    public Transformer()
+    public Transformer(String filter)
     {
         classPool = ClassPool.getDefault();
+        this.filter = filter;
     }
 
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer)
@@ -24,29 +26,35 @@ public class Transformer implements ClassFileTransformer
     {
         try
         {
-            classPool.insertClassPath(new ByteArrayClassPath(className, classfileBuffer));
-            final String correctClassName = className.replace('/', '.');
-            final CtClass cc = classPool.get(correctClassName);
-            final CtMethod[] methods = cc.getMethods();
-            for (int k = 0; k < methods.length; k++)
+            if (className != null &&
+                !className.contains("java") && !className.contains("sun") &&
+                (filter == null || className.startsWith(filter)))
             {
-
-                final CtMethod method = methods[k];
-
-                if (method.getLongName().startsWith(correctClassName))
+                final String correctClassName = className.replace('/', '.');
+                final CtClass cc = classPool.get(correctClassName);
+                if (!cc.isInterface() && !cc.isPrimitive() && !cc.isFrozen())
                 {
-                    method.addLocalVariable("_startTime", CtClass.longType);
-                    method.insertBefore("_startTime = System.nanoTime();");
+                    final CtMethod[] methods = cc.getMethods();
+                    for (int k = 0; k < methods.length; k++)
+                    {
+                        final CtMethod method = methods[k];
+                        if (!method.isEmpty()  && method.getLongName().startsWith(correctClassName))
+                        {
+                            method.addLocalVariable("_startTime", CtClass.longType);
+                            method.insertBefore("_startTime = System.nanoTime();");
 
-                    method.insertAfter("System.out.println(\"Executing: " +
-                                           method.getLongName() +
-                                           " takes \" + (System.nanoTime() - _startTime));");
+                            method.insertAfter("System.out.println(\"Executing: " +
+                                                   method.getLongName() +
+                                                   " takes \" + (System.nanoTime() - _startTime));");
+                        }
+                    }
+
+                    // return the new bytecode array:
+                    final byte[] newClassfileBuffer = cc.toBytecode();
+                    return newClassfileBuffer;
+
                 }
             }
-
-            // return the new bytecode array:
-            final byte[] newClassfileBuffer = cc.toBytecode();
-            return newClassfileBuffer;
         }
         catch (IOException ioe)
         {
