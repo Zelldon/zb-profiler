@@ -1,4 +1,4 @@
-package de.zell.zb.profiler;
+package de.zell.zb.profiler.test;
 
 /**
  *
